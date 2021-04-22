@@ -42,12 +42,15 @@ function App() {
   // } = useForm<Inputs>();
 
   const classes = useStyles();
-  const [toDoList, setTodoList] = React.useState<TodoType[]>([]);
+  const [toDoList, setTodoList] = React.useState<TodoType[]>([
+    { id: 0, task: "task-0", complete: true },
+    { id: 5, task: "task-5", complete: false },
+    { id: 3, task: "task-3", complete: true },
+  ]);
   const [text, setText] = React.useState("");
 
-  const handleWrite = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setText(event.currentTarget.value);
-  };
+  const testInput = React.createRef<HTMLInputElement>();
+
   const handleSubmit = () => {
     let idList = toDoList.map((task) => task.id);
     let maxId = Math.max(0, ...idList);
@@ -83,53 +86,57 @@ function App() {
       <div className="App-header">
         <TextField
           label="Ввести / Редактировать"
-          onChange={handleWrite}
-          value={text}
+          onChange={() => setText(testInput.current?.value ?? "")}
+          inputRef={testInput}
         />
-        <Button color="primary" onClick={handleSubmit}>
-          Отправить
-        </Button>
-        <Button color="primary" onClick={handleFilter}>
-          Удалить готовые
-        </Button>
-        <Paper>
-          <List className={classes.root}>
-            {toDoList.map((value) => {
-              return (
-                <ListItem
-                  key={value.id}
-                  role={undefined}
-                  dense
-                  button
-                  // onChange={() => handleEdit(value.id)}
-                >
-                  <ListItemIcon>
-                    <Checkbox
-                      edge="start"
-                      checked={value.complete}
-                      tabIndex={-1}
-                      disableRipple
-                      onChange={() => handleChangeBoolean(value.id)}
+        <form
+          action="http://localhost:8333/posttodo"
+          method="post"
+          // encType="multipart/form-data"
+        >
+          <input type="submit" value="На сервер" />
+          <Button onClick={handleSubmit} children={"Отправить"} />
+          <Button onClick={handleFilter} children={"Удалить готовые"} />
+          <Paper>
+            <List className={classes.root}>
+              {toDoList.map((value) => {
+                return (
+                  <ListItem key={value.id} role={undefined} dense button>
+                    <ListItemIcon>
+                      <Checkbox
+                        name={`items[${value.id}][complete]`}
+                        edge="start"
+                        checked={value.complete}
+                        tabIndex={-1}
+                        disableRipple
+                        onChange={() => handleChangeBoolean(value.id)}
+                      />
+                    </ListItemIcon>
+                    <ListItemText primary={`${value.id}:`} />
+                    <input
+                      type="hidden"
+                      value={value.id}
+                      name={`items[${value.id}][id]`}
                     />
-                  </ListItemIcon>
-                  <ListItemText primary={`${value.id}:`} />
-                  <TextField
-                    value={`${value.task}`}
-                    onChange={(e) => handleEdit(value.id, e.target.value)}
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      edge="end"
-                      onClick={() => handleDelete(value.id)}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              );
-            })}
-          </List>
-        </Paper>
+                    <TextField
+                      name={`items[${value.id}][task]`}
+                      value={`${value.task}`}
+                      onChange={(e) => handleEdit(value.id, e.target.value)}
+                    />
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        onClick={() => handleDelete(value.id)}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                );
+              })}
+            </List>
+          </Paper>
+        </form>
       </div>
     </div>
   );
