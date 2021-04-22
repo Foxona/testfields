@@ -45,17 +45,12 @@ function App() {
   const [toDoList, setTodoList] = React.useState<TodoType[]>([]);
   const [text, setText] = React.useState("");
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWrite = (event: React.ChangeEvent<HTMLInputElement>) => {
     setText(event.currentTarget.value);
   };
   const handleSubmit = () => {
     let idList = toDoList.map((task) => task.id);
-    let maxId = 0;
-    for (let i = 0; i < idList.length; i++) {
-      if (idList[i] > maxId) {
-        maxId = idList[i];
-      }
-    }
+    let maxId = Math.max(0, ...idList);
     setTodoList([...toDoList, { id: maxId + 1, task: text, complete: false }]);
   };
   const handleDelete = (id: number) => {
@@ -70,6 +65,12 @@ function App() {
     );
     setTodoList(newArr);
   };
+  const handleEdit = (id: number, editText: string) => {
+    let edited = toDoList.map((list) => {
+      return list.id === id ? { ...list, task: editText } : list;
+    });
+    setTodoList(edited);
+  };
   const handleFilter = () => {
     let filtered = toDoList.filter((task) => {
       return !task.complete;
@@ -81,8 +82,8 @@ function App() {
     <div className="App">
       <div className="App-header">
         <TextField
-          label="Введите тудушу"
-          onChange={handleChange}
+          label="Ввести / Редактировать"
+          onChange={handleWrite}
           value={text}
         />
         <Button color="primary" onClick={handleSubmit}>
@@ -100,7 +101,7 @@ function App() {
                   role={undefined}
                   dense
                   button
-                  // onClick={handleToggle(value.id)}
+                  // onChange={() => handleEdit(value.id)}
                 >
                   <ListItemIcon>
                     <Checkbox
@@ -111,7 +112,11 @@ function App() {
                       onChange={() => handleChangeBoolean(value.id)}
                     />
                   </ListItemIcon>
-                  <ListItemText primary={`${value.id}: ${value.task}`} />
+                  <ListItemText primary={`${value.id}:`} />
+                  <TextField
+                    value={`${value.task}`}
+                    onChange={(e) => handleEdit(value.id, e.target.value)}
+                  />
                   <ListItemSecondaryAction>
                     <IconButton
                       edge="end"
