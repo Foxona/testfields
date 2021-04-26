@@ -1,5 +1,5 @@
 import React from "react";
-// import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import {
   TextField,
@@ -34,45 +34,31 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 function App() {
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   watch,
-  //   formState: { errors },
-  // } = useForm<Inputs>();
-
   const classes = useStyles();
-  const [toDoList, setTodoList] = React.useState<TodoType[]>([
-    // { id: 0, task: "task-0", complete: true },
-    // { id: 5, task: "task-5", complete: false },
-    // { id: 3, task: "task-3", complete: true },
-  ]);
-  const [text, setText] = React.useState("");
+  const [toDoList, setTodoList] = React.useState<TodoType[]>([]);
 
-  const testInput = React.createRef<HTMLInputElement>();
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<TodoType>();
 
-  const handleSubmit = () => {
+  const onSubmit = (data: TodoType) => {
+    console.log(data);
+    console.log("errors", errors);
+  };
+
+  const handleAdd = () => {
     let idList = toDoList.map((task) => task.id);
     let maxId = Math.max(0, ...idList);
-    setTodoList([...toDoList, { id: maxId + 1, task: text, complete: false }]);
+    setTodoList([...toDoList, { id: maxId + 1, task: "", complete: false }]);
   };
   const handleDelete = (id: number) => {
     let deleted = toDoList.filter((task) => {
       return task.id !== id;
     });
     setTodoList(deleted);
-  };
-  const handleChangeBoolean = (id: number) => {
-    let newArr = toDoList.map((task) =>
-      task.id === id ? { ...task, complete: !task.complete } : task
-    );
-    setTodoList(newArr);
-  };
-  const handleEdit = (id: number, editText: string) => {
-    let edited = toDoList.map((list) => {
-      return list.id === id ? { ...list, task: editText } : list;
-    });
-    setTodoList(edited);
   };
   const handleFilter = () => {
     let filtered = toDoList.filter((task) => {
@@ -84,18 +70,14 @@ function App() {
   return (
     <div className="App">
       <div className="App-header">
-        <TextField
-          label="Ввести / Редактировать"
-          onChange={() => setText(testInput.current?.value ?? "")}
-          inputRef={testInput}
-        />
         <form
           action="http://localhost:8333/posttodo"
           method="post"
+          onSubmit={handleSubmit(onSubmit)}
           // encType="multipart/form-data"
         >
           <input type="submit" value="На сервер" />
-          <Button onClick={handleSubmit} children={"Отправить"} />
+          <Button onClick={handleAdd} children={"Добавить"} />
           <Button onClick={handleFilter} children={"Удалить готовые"} />
           <Paper>
             <List className={classes.root}>
@@ -103,26 +85,34 @@ function App() {
                 return (
                   <ListItem key={value.id} role={undefined} dense button>
                     <ListItemIcon>
-                      <Checkbox
-                        name={`items[${value.id}][complete]`}
-                        edge="start"
-                        checked={value.complete}
-                        tabIndex={-1}
-                        disableRipple
-                        onChange={() => handleChangeBoolean(value.id)}
+                      <Controller
+                        name={`items[${value.id}][complete]` as any}
+                        control={control}
+                        defaultValue={false}
+                        render={({ field }) => <Checkbox {...field} />}
                       />
                     </ListItemIcon>
-                    <ListItemText primary={`${value.id}:`} />
-                    <input
-                      type="hidden"
-                      value={value.id}
-                      name={`items[${value.id}][id]`}
+                    <Controller
+                      name={`items[${value.id}][id]` as any}
+                      defaultValue={value.id}
+                      control={control}
+                      render={({ field }) => {
+                        return (
+                          <>
+                            <ListItemText primary={field.value} />
+                            <input type="hidden" {...field} />
+                          </>
+                        );
+                      }}
                     />
-                    <TextField
-                      name={`items[${value.id}][task]`}
-                      value={`${value.task}`}
-                      onChange={(e) => handleEdit(value.id, e.target.value)}
+                    <Controller
+                      name={`items[${value.id}][task]` as any}
+                      control={control}
+                      render={({ field }) => (
+                        <TextField {...field} inputRef={field.ref} />
+                      )}
                     />
+                    {errors.task && <p>errors.task.message</p>}
                     <ListItemSecondaryAction>
                       <IconButton
                         edge="end"
