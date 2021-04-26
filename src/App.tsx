@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import {
   TextField,
@@ -35,14 +35,19 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function App() {
   const classes = useStyles();
-  const [toDoList, setTodoList] = React.useState<TodoType[]>([]);
+  const [toDoList, setTodoList] = React.useState<TodoType[]>([
+    {
+      complete: false,
+      id: 333,
+      task: "whatever",
+    },
+  ]);
 
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
-  } = useForm<TodoType>();
+  } = useForm<{ test: TodoType[] }>();
 
   const onSubmit = (data: TodoType) => {
     console.log(data);
@@ -85,34 +90,22 @@ function App() {
                 return (
                   <ListItem key={value.id} role={undefined} dense button>
                     <ListItemIcon>
-                      <Controller
-                        name={`items[${value.id}][complete]` as any}
-                        control={control}
-                        defaultValue={false}
-                        render={({ field }) => <Checkbox {...field} />}
+                      <Checkbox
+                        inputProps={register(
+                          `test.${value.id}.complete` as const
+                        )}
                       />
                     </ListItemIcon>
-                    <Controller
-                      name={`items[${value.id}][id]` as any}
-                      defaultValue={value.id}
-                      control={control}
-                      render={({ field }) => {
-                        return (
-                          <>
-                            <ListItemText primary={field.value} />
-                            <input type="hidden" {...field} />
-                          </>
-                        );
-                      }}
+                    <ListItemText primary={value.id} />
+                    <input
+                      type="hidden"
+                      value={value.id}
+                      {...register(`test.${value.id}.id` as const)}
                     />
-                    <Controller
-                      name={`items[${value.id}][task]` as any}
-                      control={control}
-                      render={({ field }) => (
-                        <TextField {...field} inputRef={field.ref} />
-                      )}
+                    <TextField
+                      inputProps={register(`test.${value.id}.task` as const)}
                     />
-                    {errors.task && <p>errors.task.message</p>}
+                    {/* {errors.task && <p>errors.task.message</p>} */}
                     <ListItemSecondaryAction>
                       <IconButton
                         edge="end"
