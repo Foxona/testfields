@@ -43,9 +43,9 @@ function App() {
 
   const classes = useStyles();
   const [toDoList, setTodoList] = React.useState<TodoType[]>([
-    { id: 0, task: "task-0", complete: true },
-    { id: 5, task: "task-5", complete: false },
-    { id: 3, task: "task-3", complete: true },
+    // { id: 0, task: "task-0", complete: true },
+    // { id: 5, task: "task-5", complete: false },
+    // { id: 3, task: "task-3", complete: true },
   ]);
   const [text, setText] = React.useState("");
 
