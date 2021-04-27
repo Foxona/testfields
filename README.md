@@ -1,46 +1,100 @@
-# Getting Started with Create React App
+# reducer excercise
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
 
-In the project directory, you can run:
+### You can start to solve tasks with a for loop and then refactor by using the Array.reduce method.
 
-### `yarn start`
+## Multiplication
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Given a string containing comma-separated numbers, multiply them.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```function multiplyTask(input: string) => number```
 
-### `yarn test`
+```
+Input:
+    "2,1,4,3"
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Output:
+    24
 
-### `yarn build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Input:
+    "2,1,4,3,0,3"
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Output:
+    0
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Parse strings to objects
 
-### `yarn eject`
+Given the following key=value formatted string, produce an object containing the same information.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```function parseTask(input: string) => {[k: string]: string} // aka object ```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+Input:
+    "x=09,b=8,c=hello,d=this is d,phone=5553535"
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Output:
+    {
+        "x": "09",
+        "b": "8",
+        "c": "hello",
+        "d": "this is d",
+        "phone": "5553535"
+    }
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
+Input:
+    "x=\"700\", y = 9,z=abc def,g=h"
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Output:
+    {
+        "x": "\"700\"",
+        " y ": " 9",
+        "z": "abc def",
+        "g": "h"
+    }
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+
+## Power metering
+
+Create a state machine that can properly handle the following messages by changing the state.
+Treat space as argument separators. Assume that powerplant names cannot contain spaces.
+
+```
+    type Citizen = {id: number, credits: number, lignts_on: boolean, powerplant: string}
+    type StateType = {monthly_fee: number, citizens: Citizen[]}
+    
+    function handlePowerMessage(oldState: StateType, message: string) => StateType // new (changed) state
+```
+
+
+State:
+```
+    const state = {
+        monthly_fee: 11,
+        citizens: [
+            { id: 249, credits: 3, lights_on: true, poweplant: "west" },
+            { id: 1412, credits: 3, lights_on: true, poweplant: "south-9" },
+            { id: 42, credits: -21, lights_on: true, poweplant: "south-9" },
+        ],
+    }
+
+```
+
+Messages:
+
+```
+    "month_passed"
+    "fee_changed 13"
+    "add_credits 42 32" // increase credits of user 42 by 32
+    "power_failure south-9"
+    "power_restored south-9"
+    "toggle_lights 42"
+    "new_citizen 621"
+    "remove_citizen 1412 west"
+```
+
+
