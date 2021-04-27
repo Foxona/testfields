@@ -22,6 +22,7 @@ type TodoType = {
   task: string;
   complete: boolean;
 };
+type TodoForm = { test: TodoType[] };
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -33,23 +34,31 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
+
 function App() {
   const classes = useStyles();
-  const [toDoList, setTodoList] = React.useState<TodoType[]>([
-    {
-      complete: false,
-      id: 333,
-      task: "whatever",
-    },
-  ]);
-
   const {
-    register,
+    control,
     handleSubmit,
+    watch,
     formState: { errors },
-  } = useForm<{ test: TodoType[] }>();
+  } = useForm<TodoForm>();
 
-  const onSubmit = (data: TodoType) => {
+  // const [toDoList, setTodoList] = React.useState<TodoType[]>([]);
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `test`, // unique name for your Field Array
+    keyName: "id", // default to "id", you can change the key name
+  });
+
+  // https://react-hook-form.com/api/usefieldarray
+  // "Controlled Field Array"
+
+  const controls = watch(`test`, []);
+  let toDoList = controls.map((ctrl, i) => ({ ...ctrl, ...fields[i] }));
+  // there's a bug when the first id does not receive updates
+
+  const onSubmit = (data: TodoForm) => {
     console.log(data);
     console.log("errors", errors);
   };
@@ -57,21 +66,25 @@ function App() {
   const handleAdd = () => {
     let idList = toDoList.map((task) => task.id);
     let maxId = Math.max(0, ...idList);
-    setTodoList([...toDoList, { id: maxId + 1, task: "", complete: false }]);
-  };
-  const handleDelete = (id: number) => {
-    let deleted = toDoList.filter((task) => {
-      return task.id !== id;
-    });
-    setTodoList(deleted);
+    append({ id: maxId + 1, task: "", complete: false });
   };
   const handleFilter = () => {
-    let filtered = toDoList.filter((task) => {
-      return !task.complete;
-    });
-    setTodoList(filtered);
+    const i = toDoList.findIndex((task) => task.complete);
+    // can't remove everything at once because of stupid React-hook-form limitation
+    // only one operation is allowed per render
+    if (i !== -1) {
+      remove(i);
+    }
   };
-
+  const Ctrl = (i: string, render: (p: any) => JSX.Element, defaultValue?: any) => (
+    <Controller
+      control={control}
+      defaultValue={defaultValue}
+      shouldUnregister={true}
+      name={`test.${i}` as any}
+      render={({ field }) => render({ ...field })}
+    />
+  );
   return (
     <div className="App">
       <div className="App-header">
@@ -79,37 +92,27 @@ function App() {
           action="http://localhost:8333/posttodo"
           method="post"
           onSubmit={handleSubmit(onSubmit)}
-          // encType="multipart/form-data"
+        // encType="multipart/form-data"
         >
           <input type="submit" value="На сервер" />
           <Button onClick={handleAdd} children={"Добавить"} />
-          <Button onClick={handleFilter} children={"Удалить готовые"} />
+          <Button onClick={handleFilter} children={"Удалить готовое"} />
           <Paper>
             <List className={classes.root}>
-              {toDoList.map((value) => {
+              {toDoList.map((value, i) => {
                 return (
                   <ListItem key={value.id} role={undefined} dense button>
                     <ListItemIcon>
-                      <Checkbox
-                        inputProps={register(
-                          `test.${value.id}.complete` as const
-                        )}
-                      />
+                      {Ctrl(`${i}.complete`, p => <Checkbox {...p} />, false)}
                     </ListItemIcon>
                     <ListItemText primary={value.id} />
-                    <input
-                      type="hidden"
-                      value={value.id}
-                      {...register(`test.${value.id}.id` as const)}
-                    />
-                    <TextField
-                      inputProps={register(`test.${value.id}.task` as const)}
-                    />
-                    {/* {errors.task && <p>errors.task.message</p>} */}
+                    {Ctrl(`${i}.id`, p => <input {...p} type="hidden" />, value.id)}
+                    {Ctrl(`${i}.task`, p => <TextField inputProps={p} />, value.task)}
+                    {errors.test && <p>errors.test</p>}
                     <ListItemSecondaryAction>
                       <IconButton
                         edge="end"
-                        onClick={() => handleDelete(value.id)}
+                        onClick={() => remove(i)}
                       >
                         <Delete />
                       </IconButton>
