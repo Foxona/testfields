@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 // import { useForm } from "react-hook-form";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import {
@@ -41,12 +41,16 @@ function App() {
   //   formState: { errors },
   // } = useForm<Inputs>();
 
+  // {msg: string, data: TodoType[]}
+
+  const fetchServer: () => Promise<TodoType[]> = async () => {
+    const serRes = await fetch("http://localhost:8333/todos");
+    const todosRes = await serRes.json();
+    return todosRes.data;
+  };
+
   const classes = useStyles();
-  const [toDoList, setTodoList] = React.useState<TodoType[]>([
-    { id: 0, task: "task-0", complete: true },
-    { id: 5, task: "task-5", complete: false },
-    { id: 3, task: "task-3", complete: true },
-  ]);
+  const [toDoList, setTodoList] = React.useState<TodoType[]>([]);
   const [text, setText] = React.useState("");
 
   const testInput = React.createRef<HTMLInputElement>();
@@ -81,21 +85,27 @@ function App() {
     setTodoList(filtered);
   };
 
+  useEffect(() => {
+    fetchServer().then((res) => {
+      setTodoList(res);
+    });
+  }, []);
+
   return (
     <div className="App">
       <div className="App-header">
         <TextField
-          label="Ввести / Редактировать"
+          label="Введите"
           onChange={() => setText(testInput.current?.value ?? "")}
           inputRef={testInput}
         />
         <form
-          action="http://localhost:8333/posttodo"
+          action="http://localhost:8333/todos"
           method="post"
           // encType="multipart/form-data"
         >
           <input type="submit" value="На сервер" />
-          <Button onClick={handleSubmit} children={"Отправить"} />
+          <Button onClick={handleSubmit} children={"Добавить"} />
           <Button onClick={handleFilter} children={"Удалить готовые"} />
           <Paper>
             <List className={classes.root}>
