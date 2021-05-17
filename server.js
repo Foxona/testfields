@@ -1,6 +1,6 @@
 var express = require("express");
 var cors = require("cors");
-var bodyParser = require("body-parser");
+// var bodyParser = require("body-parser");
 var app = express();
 
 let todos = [
@@ -12,7 +12,8 @@ let todos = [
 // app.options('*', cors())
 app.use(cors());
 
-app.use(bodyParser.urlencoded({ type: "*/*" }));
+// app.use(bodyParser.urlencoded({ type: "*/*" }));
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/todos", function (req, res, next) {
   res.json({
