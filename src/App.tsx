@@ -30,6 +30,16 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: 720,
       backgroundColor: theme.palette.background.paper,
     },
+    marginLeftObj: {
+      marginLeft: "1rem",
+    },
+    container: {
+      marginTop: "2rem",
+    },
+    button: {
+      marginLeft: "1rem",
+      marginRight: "1rem",
+    },
   })
 );
 
@@ -51,9 +61,9 @@ function App() {
 
   const classes = useStyles();
   const [toDoList, setTodoList] = React.useState<TodoType[]>([]);
-  const [text, setText] = React.useState("");
+  const text = "";
 
-  const testInput = React.createRef<HTMLInputElement>();
+  // const testInput = React.createRef<HTMLInputElement>();
 
   const handleSubmit = () => {
     let idList = toDoList.map((task) => task.id);
@@ -63,6 +73,9 @@ function App() {
   const handleDelete = (id: number) => {
     let deleted = toDoList.filter((task) => {
       return task.id !== id;
+    });
+    fetch(`http://localhost:8333/todos/delete/?id=${id}`, {
+      method: "POST",
     });
     setTodoList(deleted);
   };
@@ -94,59 +107,72 @@ function App() {
   return (
     <div className="App">
       <div className="App-header">
-        <TextField
+        <div className={classes.container}>
+          {/* <TextField
           label="Введите"
           onChange={() => setText(testInput.current?.value ?? "")}
           inputRef={testInput}
-        />
-        <form
-          action="http://localhost:8333/todos"
-          method="post"
-          // encType="multipart/form-data"
-        >
-          <input type="submit" value="На сервер" />
-          <Button onClick={handleSubmit} children={"Добавить"} />
-          <Button onClick={handleFilter} children={"Удалить готовые"} />
-          <Paper>
-            <List className={classes.root}>
-              {toDoList.map((value) => {
-                return (
-                  <ListItem key={value.id} role={undefined} dense button>
-                    <ListItemIcon>
-                      <Checkbox
-                        name={`items[${value.id}][complete]`}
-                        edge="start"
-                        checked={value.complete}
-                        tabIndex={-1}
-                        disableRipple
-                        onChange={() => handleChangeBoolean(value.id)}
+        /> */}
+          <form
+            action="http://localhost:8333/todos"
+            method="post"
+            // encType="multipart/form-data"
+          >
+            <Button
+              className={classes.button}
+              onClick={handleSubmit}
+              children={"Добавить"}
+            />
+            <Button
+              className={classes.button}
+              onClick={handleFilter}
+              children={"Удалить готовые"}
+            />
+            <Paper>
+              <List className={classes.root}>
+                {toDoList.map((value) => {
+                  return (
+                    <ListItem key={value.id} role={undefined} dense button>
+                      <ListItemIcon>
+                        <Checkbox
+                          name={`items[${value.id}][complete]`}
+                          edge="start"
+                          checked={value.complete}
+                          tabIndex={-1}
+                          disableRipple
+                          onChange={() => handleChangeBoolean(value.id)}
+                          // onBlur={this.form.submit()}
+                        />
+                      </ListItemIcon>
+                      <ListItemText primary={`${value.id}: `} />
+                      <input
+                        type="hidden"
+                        value={value.id}
+                        name={`items[${value.id}][id]`}
                       />
-                    </ListItemIcon>
-                    <ListItemText primary={`${value.id}:`} />
-                    <input
-                      type="hidden"
-                      value={value.id}
-                      name={`items[${value.id}][id]`}
-                    />
-                    <TextField
-                      name={`items[${value.id}][task]`}
-                      value={`${value.task}`}
-                      onChange={(e) => handleEdit(value.id, e.target.value)}
-                    />
-                    <ListItemSecondaryAction>
-                      <IconButton
-                        edge="end"
-                        onClick={() => handleDelete(value.id)}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                );
-              })}
-            </List>
-          </Paper>
-        </form>
+                      <TextField
+                        className={classes.marginLeftObj}
+                        name={`items[${value.id}][task]`}
+                        value={`${value.task}`}
+                        onChange={(e) => handleEdit(value.id, e.target.value)}
+                      />
+                      <ListItemSecondaryAction>
+                        <IconButton
+                          className={classes.marginLeftObj}
+                          edge="end"
+                          onClick={() => handleDelete(value.id)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  );
+                })}
+              </List>
+            </Paper>
+            <input type="submit" value="На сервер" />
+          </form>
+        </div>
       </div>
     </div>
   );

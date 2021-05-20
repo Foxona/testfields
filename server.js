@@ -9,7 +9,7 @@ let todos = [
   { id: 3, task: "Взорвать воронеж", complete: true },
 ];
 
-// app.options('*', cors())
+app.options("*", cors());
 app.use(cors());
 
 app.use(bodyParser.urlencoded({ type: "*/*" }));
@@ -20,6 +20,7 @@ app.get("/todos", function (req, res, next) {
     data: todos,
   });
 });
+
 app.post("/todos", function (req, res, next) {
   const items = req.body.items;
   todos = items.map((v) => {
@@ -33,11 +34,13 @@ app.post("/todos", function (req, res, next) {
   });
   res.redirect(301, "http://localhost:3000/");
 });
+
 app.post("/todos/delete", function (req, res, next) {
-  res.json({
-    msg: "ДАННЫЕ УДАЛЕНЫ",
-    data: req.body,
+  const deleteItem = Number(req.query.id);
+  todos = todos.filter((item) => {
+    return item.id !== deleteItem;
   });
+  // res.redirect(301, "http://localhost:3000/");
 });
 
 const port = 8333;
