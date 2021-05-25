@@ -14,6 +14,15 @@ app.use(cors());
 
 app.use(bodyParser.urlencoded({ type: "*/*" }));
 
+app.get(
+  "https://react-hooks-5298f-default-rtdb.firebaseio.com/todos",
+  function (req, res) {
+    console.log(req);
+    console.log(res);
+    res.json({ msg: "резалт", data: req });
+  }
+);
+
 app.get("/todos", function (req, res, next) {
   res.json({
     msg: "ЗАПРОСЫ",
