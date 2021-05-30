@@ -3,28 +3,28 @@ import logo from "./logo.svg";
 import "./App.css";
 import axios from "axios";
 
-function App() {
+function App(props: any) {
+  const initialAnimal = props.initialAnimal;
+
   const [animalFacts, setAnimalFacts] = useState<string[]>([]);
-  const [animalType, setAnimalType] = useState<string>("cat");
-
-  const axiosList = async () => {
-    axios
-      .get(
-        `https://cat-fact.herokuapp.com/facts/random?animal_type=${animalType}&amount=2`
-      )
-      .then((value) => {
-        const arr = [];
-        for (let v of value.data) {
-          arr.push(v.text);
-        }
-        setAnimalFacts(arr);
-      });
-
-    return;
-  };
+  const [animalType, setAnimalType] = useState<string>(initialAnimal);
 
   useEffect(() => {
-    axiosList();
+    const p = new Promise((res, rej) => {
+      setTimeout(() => {
+        res(666);
+      }, 2000);
+    });
+
+    p.then(() => {
+      axios
+        .get(
+          `https://cat-fact.herokuapp.com/facts/random?animal_type=${animalType}&amount=2`
+        )
+        .then((value) => {
+          setAnimalFacts(value.data.map((v: any) => v.text));
+        });
+    });
   }, [animalType]);
 
   return (
@@ -32,12 +32,14 @@ function App() {
       <header className="App-header">
         <div>
           <select
+            defaultValue={initialAnimal}
             onChange={(e) => {
               setAnimalType(e.target.value);
             }}
           >
             <option value="cat">Cat</option>
             <option value="horse">Horse</option>
+            <option value="dog">Dog</option>
           </select>
         </div>
         <img src={logo} className="App-logo" alt="logo" />
@@ -45,7 +47,7 @@ function App() {
           {
             <ul>
               {animalFacts.map((v) => (
-                <li>{v}</li>
+                <li key={v}>{v}</li>
               ))}
             </ul>
           }
