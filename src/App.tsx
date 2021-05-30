@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import axios from "axios";
 // import { useForm } from "react-hook-form";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import {
@@ -56,7 +57,8 @@ function App() {
   const fetchServer: () => Promise<TodoType[]> = async () => {
     const serRes = await fetch("http://localhost:8333/todos");
     const todosRes = await serRes.json();
-    return todosRes.data;
+    console.log(todosRes);
+    return todosRes["data"];
   };
 
   const classes = useStyles();
@@ -74,7 +76,7 @@ function App() {
     let deleted = toDoList.filter((task) => {
       return task.id !== id;
     });
-    fetch(`http://localhost:8333/todos/delete/?id=${id}`, {
+    axios(`http://localhost:8333/todos/delete/?id=${id}`, {
       method: "POST",
     });
     setTodoList(deleted);
@@ -129,7 +131,8 @@ function App() {
               children={"Удалить готовые"}
             />
             <Paper>
-              <List className={classes.root}>
+              {/* <List className={classes.root}> */}
+              <List>
                 {toDoList.map((value) => {
                   return (
                     <ListItem key={value.id} role={undefined} dense button>
